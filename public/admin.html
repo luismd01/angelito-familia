@@ -34,84 +34,111 @@
       </table>
     </div>
 
-    <div class="text-end mt-3">
-      <a href="/" class="btn btn-outline-light">Volver a la página principal</a>
-    </div>
+<div class="text-center mb-4">
+  <button id="resetButton" class="btn btn-danger btn-lg">
+    🔄 Resetear sorteo completo
+  </button>
+  <p class="text-muted small mt-2">
+    *Esto borrará todas las asignaciones y reiniciará el sorteo.*
+  </p>
+</div>
   </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import {
-      getFirestore,
-      collection,
-      getDocs
-    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import {
+    getFirestore,
+    collection,
+    getDocs,
+    updateDoc
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    // Misma config que en index.html
-    const firebaseConfig = {
-      apiKey: "AIzaSyCSNOqqsla1tab4laMk_yS7nQkC7yFEMDs",
-      authDomain: "angelito-familia.firebaseapp.com",
-      projectId: "angelito-familia",
-      storageBucket: "angelito-familia.firebasestorage.app",
-      messagingSenderId: "543102415608",
-      appId: "1:543102415608:web:0e7ba86e3b29de9a87810d",
-      measurementId: "G-7RN4FRE9SR"
-    };
+  const firebaseConfig = {
+    apiKey: "AIzaSyCSNOqqsla1tab4laMk_yS7nQkC7yFEMDs",
+    authDomain: "angelito-familia.firebaseapp.com",
+    projectId: "angelito-familia",
+    storageBucket: "angelito-familia.firebasestorage.app",
+    messagingSenderId: "543102415608",
+    appId: "1:543102415608:web:0e7ba86e3b29de9a87810d",
+    measurementId: "G-7RN4FRE9SR"
+  };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
 
-    const tbody = document.getElementById("adminTableBody");
+  const tbody = document.getElementById("adminTableBody");
 
-    async function loadAdminData() {
-      tbody.innerHTML = `
-        <tr>
-          <td colspan="5" class="text-center text-muted">
-            Cargando datos...
-          </td>
-        </tr>
-      `;
+  async function loadAdminData() {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5" class="text-center text-muted">
+          Cargando datos...
+        </td>
+      </tr>
+    `;
 
-      try {
-        const snap = await getDocs(collection(db, "participants"));
-        let participants = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    try {
+      const snap = await getDocs(collection(db, "participants"));
+      let participants = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-        // Ordenar por nombre para que se vea bonito
-        participants.sort((a, b) => a.name.localeCompare(b.name, "es"));
+      participants.sort((a, b) => a.name.localeCompare(b.name, "es"));
 
-        tbody.innerHTML = "";
+      tbody.innerHTML = "";
 
-        participants.forEach((p, index) => {
-          const tr = document.createElement("tr");
+      participants.forEach((p, index) => {
+        const tr = document.createElement("tr");
 
-          const hasPickedLabel = p.hasPicked ? "✅ Sí" : "❌ No";
-          const angelitoLabel = p.assignedTo && p.assignedTo !== ""
+        const hasPickedLabel = p.hasPicked ? "✅ Sí" : "❌ No";
+        const angelitoLabel =
+          p.assignedTo && p.assignedTo !== ""
             ? p.assignedTo
             : "<span class='text-warning'>Pendiente</span>";
 
-          tr.innerHTML = `
-            <td>${index + 1}</td>
-            <td>${p.name}</td>
-            <td><code>${p.code}</code></td>
-            <td>${hasPickedLabel}</td>
-            <td>${angelitoLabel}</td>
-          `;
-
-          tbody.appendChild(tr);
-        });
-      } catch (error) {
-        console.error(error);
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="5" class="text-center text-danger">
-              Error cargando datos desde Firestore. Revisa la consola.
-            </td>
-          </tr>
+        tr.innerHTML = `
+          <td>${index + 1}</td>
+          <td>${p.name}</td>
+          <td><code>${p.code}</code></td>
+          <td>${hasPickedLabel}</td>
+          <td>${angelitoLabel}</td>
         `;
-      }
-    }
 
+        tbody.appendChild(tr);
+      });
+    } catch (error) {
+      console.error(error);
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="5" class="text-center text-danger">
+            Error cargando datos desde Firestore.
+          </td>
+        </tr>
+      `;
+    }
+  }
+
+  // 🔄 Reset completo del sorteo
+  async function resetAll() {
+    if (!confirm("¿Estás seguro? Esta acción reiniciará todo el sorteo.")) return;
+
+    const snap = await getDocs(collection(db, "participants"));
+
+    const updates = snap.docs.map((docSnap) =>
+      updateDoc(docSnap.ref, {
+        hasPicked: false,
+        assignedTo: "",
+        pickedAt: null
+      })
+    );
+
+    await Promise.all(updates);
+
+    alert("Sorteo reseteado correctamente 🎄");
     loadAdminData();
-  </script>
+  }
+
+  document.getElementById("resetButton").addEventListener("click", resetAll);
+
+  loadAdminData();
+</script>
 </body>
 </html>
