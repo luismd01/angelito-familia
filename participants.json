@@ -3,8 +3,8 @@
     "id": 1,
     "name": "Luis",
     "code": "LUIS123",
-    "hasPicked": true,
-    "assignedTo": 2
+    "hasPicked": false,
+    "assignedTo": null
   },
   {
     "id": 2,
