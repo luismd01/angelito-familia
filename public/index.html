@@ -79,7 +79,7 @@
       celebrationDiv.classList.add("d-none");
       resetBtn.classList.add("d-none");
 
-      const code = codeInput.value.trim();
+      const code = codeInput.value.trim().toLowerCase();
 
       if (!code) return;
 
@@ -137,6 +137,11 @@
       celebrationDiv.classList.add("d-none");
       resetBtn.classList.add("d-none");
       codeInput.focus();
+    });
+
+    // Normalize input to lowercase as the user types
+    codeInput.addEventListener("input", () => {
+      codeInput.value = codeInput.value.toLowerCase();
     });
   </script>
 </body>

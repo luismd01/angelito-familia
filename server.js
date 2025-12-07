@@ -26,7 +26,7 @@ function writeParticipants(participants) {
 
 // API: draw angelito by code
 app.post("/api/draw", (req, res) => {
-  const { code } = req.body;
+  const code = (req.body.code || "").trim().toLowerCase();
 
   if (!code) {
     return res.status(400).json({ success: false, message: "Código requerido" });

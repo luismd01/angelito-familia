@@ -2,84 +2,84 @@
   {
     "id": 1,
     "name": "Luis Ángel",
-    "code": "LuiA73",
+    "code": "luia73",
     "hasPicked": false,
     "assignedTo": null
   },
   {
     "id": 2,
     "name": "Karina",
-    "code": "KarF52",
+    "code": "karf52",
     "hasPicked": false,
     "assignedTo": null
   },
   {
     "id": 3,
     "name": "Miguel Maldonado",
-    "code": "MigP18",
+    "code": "migp18",
     "hasPicked": false,
     "assignedTo": null
   },
   {
     "id": 4,
     "name": "Angel Luis",
-    "code": "AngR91",
+    "code": "angr91",
     "hasPicked": false,
     "assignedTo": null
   },
   {
     "id": 5,
     "name": "Martin Mardonado",
-    "code": "MarT64",
+    "code": "mart64",
     "hasPicked": false,
     "assignedTo": null
   },
   {
     "id": 6,
     "name": "Tía Quica",
-    "code": "TíaM07",
+    "code": "tíam07",
     "hasPicked": false,
     "assignedTo": null
   },
   {
     "id": 7,
     "name": "Oneida",
-    "code": "OneK84",
+    "code": "onek84",
     "hasPicked": false,
     "assignedTo": null
   },
   {
     "id": 8,
     "name": "Angela Maldonado",
-    "code": "AngS29",
+    "code": "angs29",
     "hasPicked": false,
     "assignedTo": null
   },
   {
     "id": 9,
     "name": "Angelica Maldonado",
-    "code": "AngL56",
+    "code": "angl56",
     "hasPicked": false,
     "assignedTo": null
   },
   {
     "id": 10,
     "name": "Yajaira Maldonado",
-    "code": "YajC48",
+    "code": "yajc48",
     "hasPicked": false,
     "assignedTo": null
   },
   {
     "id": 11,
     "name": "Roberto Maldonado",
-    "code": "RobQ22",
+    "code": "robq22",
     "hasPicked": false,
     "assignedTo": null
   },
   {
     "id": 12,
     "name": "Heidy",
-    "code": "HeiM63",
+    "code": "heim63",
     "hasPicked": false,
     "assignedTo": null
   }
