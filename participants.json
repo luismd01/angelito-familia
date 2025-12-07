@@ -1,0 +1,23 @@
+[
+  {
+    "id": 1,
+    "name": "Luis",
+    "code": "LUIS123",
+    "hasPicked": true,
+    "assignedTo": 2
+  },
+  {
+    "id": 2,
+    "name": "Daniela",
+    "code": "DANI456",
+    "hasPicked": false,
+    "assignedTo": null
+  },
+  {
+    "id": 3,
+    "name": "Mama",
+    "code": "MAMA789",
+    "hasPicked": false,
+    "assignedTo": null
+  }
+]

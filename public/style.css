@@ -1,0 +1,49 @@
+/* General background (Christmas colors) */
+.bg-christmas {
+  background: linear-gradient(135deg, #0b3b0b, #b30000);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Slight dark overlay for contrast */
+.bg-christmas .overlay {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at top, rgba(255, 255, 255, 0.12), transparent 60%);
+  pointer-events: none;
+}
+
+/* Main card */
+.main-card {
+  max-width: 420px;
+  width: 100%;
+  border-radius: 20px;
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+}
+
+/* Inputs */
+#codeInput {
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+/* Celebration text */
+.celebration h2 {
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+}
+
+/* Mobile tweaks */
+@media (max-width: 576px) {
+  .main-card {
+    margin: 0 1rem;
+  }
+}
+
+/* Admin background */
+.bg-dark-admin {
+  background: #111;
+  min-height: 100vh;
+}
