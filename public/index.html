@@ -79,7 +79,7 @@
       serverTimestamp
     } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-    // ⚙️ CONFIG DE TU PROYECTO (corrigiendo a la del panel)
+    // ⚙️ CONFIG DE TU PROYECTO
     const firebaseConfig = {
       apiKey: "AIzaSyCSNOqqsla1tab4laMk_yS7nQkC7yFEMDs",
       authDomain: "angelito-familia.firebaseapp.com",
@@ -103,9 +103,9 @@
     // 📚 Colección de participantes
     const participantsCol = collection(db, "participants");
 
-    // 🔍 Buscar participante por código
+    // 🔍 Buscar participante por código (EN MINÚSCULAS)
     async function getParticipantByCode(code) {
-      const cleanCode = code.trim().toUpperCase();
+      const cleanCode = code.trim().toLowerCase();  // 👈 cambio aquí
       const q = query(participantsCol, where("code", "==", cleanCode));
       const snap = await getDocs(q);
 
@@ -181,8 +181,8 @@
       const rawCode = codeInput.value.trim();
       if (!rawCode) return;
 
-      // Para Firebase usamos MAYÚSCULAS
-      const codeForDb = rawCode.toUpperCase();
+      // Para Firebase usamos MINÚSCULAS
+      const codeForDb = rawCode.toLowerCase();  // 👈 cambio aquí
 
       try {
         // 1) Buscar participante por código
