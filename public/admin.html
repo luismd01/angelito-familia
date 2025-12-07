@@ -39,24 +39,62 @@
     </div>
   </div>
 
-  <script>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      getDocs
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    // Misma config que en index.html
+    const firebaseConfig = {
+      apiKey: "AIzaSyCSNOqqsla1tab4laMk_yS7nQkC7yFEMDs",
+      authDomain: "angelito-familia.firebaseapp.com",
+      projectId: "angelito-familia",
+      storageBucket: "angelito-familia.firebasestorage.app",
+      messagingSenderId: "543102415608",
+      appId: "1:543102415608:web:0e7ba86e3b29de9a87810d",
+      measurementId: "G-7RN4FRE9SR"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const tbody = document.getElementById("adminTableBody");
+
     async function loadAdminData() {
-      const tbody = document.getElementById("adminTableBody");
-      tbody.innerHTML = "";
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="5" class="text-center text-muted">
+            Cargando datos...
+          </td>
+        </tr>
+      `;
 
       try {
-        const res = await fetch("/api/admin-data");
-        const data = await res.json();
+        const snap = await getDocs(collection(db, "participants"));
+        let participants = snap.docs.map(d => ({ id: d.id, ...d.data() }));
 
-        data.forEach((p, index) => {
+        // Ordenar por nombre para que se vea bonito
+        participants.sort((a, b) => a.name.localeCompare(b.name, "es"));
+
+        tbody.innerHTML = "";
+
+        participants.forEach((p, index) => {
           const tr = document.createElement("tr");
+
+          const hasPickedLabel = p.hasPicked ? "✅ Sí" : "❌ No";
+          const angelitoLabel = p.assignedTo && p.assignedTo !== ""
+            ? p.assignedTo
+            : "<span class='text-warning'>Pendiente</span>";
 
           tr.innerHTML = `
             <td>${index + 1}</td>
             <td>${p.name}</td>
             <td><code>${p.code}</code></td>
-            <td>${p.hasPicked ? "✅ Sí" : "❌ No"}</td>
-            <td>${p.angelito ? p.angelito : "<span class='text-warning'>Pendiente</span>"}</td>
+            <td>${hasPickedLabel}</td>
+            <td>${angelitoLabel}</td>
           `;
 
           tbody.appendChild(tr);
@@ -66,7 +104,7 @@
         tbody.innerHTML = `
           <tr>
             <td colspan="5" class="text-center text-danger">
-              Error cargando datos. Revisa el servidor.
+              Error cargando datos desde Firestore. Revisa la consola.
             </td>
           </tr>
         `;
