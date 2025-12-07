@@ -61,12 +61,111 @@
   <!-- Bootstrap JS (optional, for some helpers) -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-  <script>
+  <!-- LÓGICA + FIREBASE -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getAnalytics,
+      isSupported
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
+    import {
+      getFirestore,
+      collection,
+      getDocs,
+      query,
+      where,
+      doc,
+      updateDoc,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    // ⚙️ CONFIG DE TU PROYECTO (corrigiendo a la del panel)
+    const firebaseConfig = {
+      apiKey: "AIzaSyCSNOqqsla1tab4laMk_yS7nQkC7yFEMDs",
+      authDomain: "angelito-familia.firebaseapp.com",
+      projectId: "angelito-familia",
+      storageBucket: "angelito-familia.firebasestorage.app",
+      messagingSenderId: "543102415608",
+      appId: "1:543102415608:web:0e7ba86e3b29de9a87810d",
+      measurementId: "G-7RN4FRE9SR"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Analytics opcional
+    isSupported()
+      .then((ok) => {
+        if (ok) getAnalytics(app);
+      })
+      .catch((err) => console.warn("Firebase analytics no disponible", err));
+
+    // 📚 Colección de participantes
+    const participantsCol = collection(db, "participants");
+
+    // 🔍 Buscar participante por código
+    async function getParticipantByCode(code) {
+      const cleanCode = code.trim().toUpperCase();
+      const q = query(participantsCol, where("code", "==", cleanCode));
+      const snap = await getDocs(q);
+
+      if (snap.empty) return null;
+
+      const docSnap = snap.docs[0];
+      return { id: docSnap.id, ...docSnap.data() };
+    }
+
+    // 👀 Obtener todos los participantes
+    async function getAllParticipants() {
+      const snap = await getDocs(participantsCol);
+      return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    }
+
+    // 🎲 Escoger un angelito disponible (sin repetirse y que no seas tú mismo)
+    async function pickAngelitoFor(participant) {
+      const all = await getAllParticipants();
+
+      const allNames = all.map((p) => p.name);
+      const takenNames = new Set(
+        all
+          .map((p) => p.assignedTo)
+          .filter((name) => !!name)
+      );
+
+      const available = allNames.filter(
+        (name) => name !== participant.name && !takenNames.has(name)
+      );
+
+      if (!available.length) {
+        throw new Error(
+          "No hay angelitos disponibles. Revisa la configuración en Firestore."
+        );
+      }
+
+      const randomIndex = Math.floor(Math.random() * available.length);
+      return available[randomIndex];
+    }
+
+    // 📝 Guardar en Firestore que ya escogió
+    async function markPicked(participantId, assignedName) {
+      const ref = doc(db, "participants", participantId);
+      await updateDoc(ref, {
+        hasPicked: true,
+        assignedTo: assignedName,
+        pickedAt: serverTimestamp()
+      });
+    }
+
+    // -------------------------
+    // 🎯 LÓGICA DE LA PÁGINA
+    // -------------------------
+
     const form = document.getElementById("codeForm");
     const codeInput = document.getElementById("codeInput");
     const messageDiv = document.getElementById("message");
     const celebrationDiv = document.getElementById("celebration");
     const celebrationTitle = document.getElementById("celebrationTitle");
+
     const resetBtn = document.createElement("button");
     resetBtn.type = "button";
     resetBtn.className = "btn btn-outline-light btn-sm mt-2 d-none";
@@ -79,34 +178,43 @@
       celebrationDiv.classList.add("d-none");
       resetBtn.classList.add("d-none");
 
-      const code = codeInput.value.trim().toLowerCase();
+      const rawCode = codeInput.value.trim();
+      if (!rawCode) return;
 
-      if (!code) return;
+      // Para Firebase usamos MAYÚSCULAS
+      const codeForDb = rawCode.toUpperCase();
 
       try {
-        const res = await fetch("/api/draw", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ code })
-        });
+        // 1) Buscar participante por código
+        const participant = await getParticipantByCode(codeForDb);
 
-        const data = await res.json();
-
-        if (!data.success) {
+        if (!participant) {
           messageDiv.innerHTML = `
             <div class="alert alert-danger" role="alert">
-              ${data.message || "Ocurrió un error. Inténtalo de nuevo."}
+              Código no encontrado. Verifica que lo escribiste bien.
             </div>
           `;
           return;
         }
 
-        // Success
-        celebrationTitle.textContent =
-          "🎉 Felicidades, tu angelito es: " + data.angelitoName + " 🎉";
+        if (participant.hasPicked) {
+          messageDiv.innerHTML = `
+            <div class="alert alert-warning" role="alert">
+              Este código ya fue utilizado anteriormente.
+            </div>
+          `;
+          return;
+        }
 
+        // 2) Escoger angelito disponible
+        const angelitoName = await pickAngelitoFor(participant);
+
+        // 3) Guardar en Firestore
+        await markPicked(participant.id, angelitoName);
+
+        // 4) Mostrar celebración
+        celebrationTitle.textContent =
+          "🎉 Felicidades, tu angelito es: " + angelitoName + " 🎉";
         celebrationDiv.classList.remove("d-none");
 
         messageDiv.innerHTML = `
@@ -115,7 +223,6 @@
           </div>
         `;
 
-        // Disable form after success
         codeInput.disabled = true;
         form.querySelector("button[type='submit']").disabled = true;
         resetBtn.classList.remove("d-none");
@@ -123,7 +230,7 @@
         console.error(error);
         messageDiv.innerHTML = `
           <div class="alert alert-danger" role="alert">
-            Error de conexión. Inténtalo de nuevo.
+            Ocurrió un error. Inténtalo de nuevo o contacta al organizador.
           </div>
         `;
       }
@@ -139,7 +246,7 @@
       codeInput.focus();
     });
 
-    // Normalize input to lowercase as the user types
+    // Normalizar visualmente a minúsculas mientras escribe
     codeInput.addEventListener("input", () => {
       codeInput.value = codeInput.value.toLowerCase();
     });

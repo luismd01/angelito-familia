@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Seed Angelito Familia</title>
+</head>
+<body>
+  <h1>Seed Angelito Familia</h1>
+  <p>Abre la consola del navegador para ver el progreso.</p>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getFirestore,
+      doc,
+      setDoc
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    // ⚙️ CONFIG igual a tu proyecto
+    const firebaseConfig = {
+      apiKey: "AIzaSyCSNOqqsla1tab4laMk_yS7nQkC7yFEMDs",
+      authDomain: "angelito-familia.firebaseapp.com",
+      projectId: "angelito-familia",
+      storageBucket: "angelito-familia.firebasestorage.app",
+      messagingSenderId: "543102415608",
+      appId: "1:543102415608:web:0e7ba86e3b29de9a87810d",
+      measurementId: "G-7RN4FRE9SR"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // 👇 PARTICIPANTES con códigos *en minúscula*
+    const participants = [
+      { name: "Luis Ángel",           code: "luia73" },
+      { name: "Karina",               code: "karf52" },
+      { name: "Miguel Maldonado",     code: "migp18" },
+      { name: "Angel Luis",           code: "angr91" },
+      { name: "Martin Mardonado",     code: "mart64" },
+      { name: "Tía Quica",            code: "tiam07" },
+      { name: "Oneida",               code: "onek84" },
+      { name: "Angela Maldonado",     code: "angs29" },
+      { name: "Angelica Maldonado",   code: "angl56" },
+      { name: "Yajaira Maldonado",    code: "yajc48" },
+      { name: "Roberto Maldonado",    code: "robq22" },
+      { name: "Heidy",                code: "heim63" }
+    ];
+
+    async function runSeed() {
+      console.log("Iniciando seed de participantes...");
+
+      for (const p of participants) {
+        const ref = doc(db, "participants", p.code); // ID = código en minúscula
+
+        await setDoc(ref, {
+          name: p.name,
+          code: p.code,       // minúscula
+          hasPicked: false,
+          assignedTo: "",
+        });
+
+        console.log(`✔ Guardado: ${p.name} (${p.code})`);
+      }
+
+      console.log("✅ Seed completado. Revisa Firestore.");
+      alert("Seed completado. Ya puedes cerrar esta página.");
+    }
+
+    runSeed().catch((err) => {
+      console.error("❌ Error corriendo el seed:", err);
+      alert("Hubo un error corriendo el seed. Mira la consola.");
+    });
+  </script>
+</body>
+</html>
